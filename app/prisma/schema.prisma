@@ -1,0 +1,69 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/sistema_pie_diabetico/app/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Paciente {
+  id                Int      @id @default(autoincrement())
+  nombre            String
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  evaluaciones      Evaluacion[]
+
+  @@map("pacientes")
+}
+
+model Evaluacion {
+  id              Int      @id @default(autoincrement())
+  fechaHora       DateTime @default(now())
+  
+  // Relación con paciente
+  pacienteId      Int
+  paciente        Paciente @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  
+  // Datos de la evaluación clínica
+  sensibilidad    Float
+  tiempoEvolucion Int      // días
+  controlGlucemico Float
+  secrecion       Boolean
+  eritema         Boolean
+  
+  // Resultados del análisis de imagen
+  areaLesion      Float
+  desvEstR        Float
+  mediaR          Float
+  mediaG          Float
+  mediaB          Float
+  cloudStoragePath String? // Ruta en S3 de la imagen
+  
+  // Resultado del sistema difuso
+  riesgo          Float
+  nivelRiesgo     String   // "BAJO", "MODERADO", "ALTO"
+  semaforoColor   String   // "verde", "amarillo", "rojo"
+  
+  // Evolución comparativa
+  evolArea        String?
+  evolDesv        String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("evaluaciones")
+}
+
+model ImagenAnalisis {
+  id               Int      @id @default(autoincrement())
+  evaluacionId     Int
+  cloudStoragePath String
+  tipoAnalisis     String   // "roi", "completa"
+  resultados       Json     // Resultados del análisis de imagen
+  createdAt        DateTime @default(now())
+
+  @@map("imagenes_analisis")
+}

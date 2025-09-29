@@ -1,0 +1,58 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/sistema_pie_diabetico/app/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Paciente {
+  id                 Int          @id @default(autoincrement())
+  nombre             String
+  fechaCreacion      DateTime     @default(now())
+  fechaActualizacion DateTime     @updatedAt
+  evaluaciones       Evaluacion[]
+
+  @@map("pacientes")
+}
+
+model Evaluacion {
+  id               Int      @id @default(autoincrement())
+  fechaHora        DateTime @default(now())
+  pacienteId       Int
+  sensibilidad     Float
+  tiempoEvolucion  Int
+  controlGlucemico Float
+  secrecion        Boolean
+  eritema          Boolean
+  areaLesion       Float
+  desvEstR         Float
+  mediaR           Float
+  mediaG           Float
+  mediaB           Float
+  cloudStoragePath String?
+  riesgo           Float
+  nivelRiesgo      String
+  semaforoColor    String
+  evolArea         String?
+  evolDesv         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  paciente         Paciente @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+
+  @@map("evaluaciones")
+}
+
+model ImagenAnalisis {
+  id               Int      @id @default(autoincrement())
+  evaluacionId     Int
+  cloudStoragePath String
+  tipoAnalisis     String
+  resultados       Json
+  createdAt        DateTime @default(now())
+
+  @@map("imagenes_analisis")
+}
